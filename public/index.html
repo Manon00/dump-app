@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17120f">
+<title>Dump</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#17120f; --s1:#241b17; --s2:#2f241e; --tx:#f3e7df; --mut:#a8958a;
+  --pink:#f4a9c0; --org:#f6b98a; --cy:#8fd6d9; --mk:#c9a18a;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:16px/1.45 "DM Sans",system-ui,sans-serif}
+h1,h2,h3,h4{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0;line-height:1.1}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+
+main{max-width:760px;margin:0 auto;padding:22px 18px 110px}
+.page{display:none}
+.page.on{display:block}
+.title{font-size:32px;font-weight:800;margin-bottom:4px}
+.sub{color:var(--mut);margin:0 0 18px}
+.section-h{margin:26px 0 12px;font-size:20px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}
+.chip{padding:7px 14px;border-radius:99px;background:var(--s2);color:var(--tx);font-size:14px;border:1.5px solid transparent}
+.chip.on{background:var(--c,var(--pink));color:#2a1a14;font-weight:700}
+.chip.tag.on{--c:var(--cy)}
+
+.blank{background:var(--s1);border-radius:26px;padding:20px;border:2px dashed #5a463b}
+.blank textarea{width:100%;min-height:130px;background:transparent;border:0;color:var(--tx);font:500 20px/1.4 "DM Sans",sans-serif;resize:vertical}
+.blank textarea::placeholder{color:#7d6a5f}
+.lbl{font-size:13px;color:var(--mut);margin:12px 0 0}
+.row{display:flex;gap:8px}
+.row input{flex:1;min-width:0;background:var(--s2);border:0;border-radius:99px;padding:8px 14px;color:var(--tx);font:inherit}
+.btn{background:var(--pink);color:#2a1a14;font-weight:700;border-radius:99px;padding:12px 22px}
+.btn.alt{background:var(--s2);color:var(--tx)}
+.btn.wide{width:100%}
+.save{width:100%;margin-top:14px;font-size:17px}
+.back{color:var(--cy);font-weight:700;padding:6px 0;margin-bottom:8px}
+
+.wall{columns:2;column-gap:14px}
+@media(min-width:620px){.wall{columns:3}}
+.dump{break-inside:avoid;margin:0 0 14px;padding:16px;border-radius:18px;background:var(--c);color:#2a1a14;text-align:left;width:100%;display:block;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.dump:nth-child(3n+1){transform:rotate(-1.2deg)}
+.dump:nth-child(3n+2){transform:rotate(.9deg)}
+.dump p{margin:0 0 10px;font-weight:500}
+.dump small{font-size:12px;font-weight:700;opacity:.75}
+.empty{color:var(--mut);padding:30px 0;text-align:center}
+
+.arch{background:var(--s1);border-radius:26px;padding:26px 22px;margin-bottom:22px}
+.arch h2{font-size:38px;font-weight:800;color:var(--pink)}
+.arch h2 em{color:var(--cy);font-style:normal}
+.bar{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:14px}
+.bar span:first-child{width:78px;color:var(--mut)}
+.bar i{display:block;height:12px;border-radius:99px;background:var(--cy)}
+
+.mag{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--s1);border-radius:20px;padding:12px;margin-bottom:12px}
+.cover{flex:none;width:60px;height:80px;border-radius:10px;background:var(--c);color:#2a1a14;display:grid;place-items:center;font:800 15px "Bricolage Grotesque",sans-serif}
+
+.iss-title{font-size:32px;margin-bottom:4px}
+.iss h4{font-size:19px;margin:20px 0 6px;color:var(--pink)}
+.iss p{font-size:16px;line-height:1.65;margin:0}
+
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:6px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(23,18,15,.92);backdrop-filter:blur(10px)}
+nav button{flex:1;max-width:200px;padding:11px 8px;border-radius:99px;color:var(--mut);font-weight:700}
+nav button.on{background:var(--s2);color:var(--org)}
+
+#modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,7,5,.7);z-index:5}
+#modal.on{display:flex}
+.card{width:100%;max-width:440px;max-height:86vh;overflow:auto;background:var(--s1);border-radius:28px;padding:24px;animation:pop .22s ease-out}
+.card .dump{transform:none;margin-bottom:16px}
+.card .dump p{font-size:22px;font-family:"Bricolage Grotesque",sans-serif;font-weight:600}
+.modal-title{margin-bottom:14px;font-size:24px}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+@media(prefers-reduced-motion:reduce){.card{animation:none}}
+
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--cy);color:#143033;font-weight:700;padding:10px 20px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:6}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<main>
+  <section class="page on" id="p-home">
+    <h1 class="title">What’s worth keeping?</h1>
+    <p class="sub">Drop it here. Sort it later.</p>
+    <div class="blank">
+      <textarea id="txt" placeholder="A quote, a link, a title, half a thought…" aria-label="New dump"></textarea>
+      <p class="lbl">Category</p>
+      <div class="chips" id="catPick"></div>
+      <p class="lbl">Tags</p>
+      <div class="chips" id="tagPick"></div>
+      <div class="row">
+        <input id="newTag" placeholder="new tag" aria-label="New tag">
+        <button class="btn alt" id="addTag">Add tag</button>
+      </div>
+      <button class="btn save" id="save">Save dump</button>
+    </div>
+    <p style="text-align:center"><button class="back" id="shuf">Daily shuffle</button></p>
+  </section>
+
+  <section class="page" id="p-wall">
+    <h1 class="title">Scrapbook</h1>
+    <p class="sub" id="wallCount"></p>
+    <div class="chips" id="fCat"></div>
+    <div class="chips" id="fTag"></div>
+    <div class="chips"><button class="chip" id="sort"></button></div>
+    <div class="wall" id="wall"></div>
+  </section>
+
+  <section class="page" id="p-me">
+    <div id="me-main">
+      <h1 class="title">Your archetype</h1>
+      <div class="arch" id="arch"></div>
+      <div id="bars"></div>
+
+      <h3 class="section-h">Mini-mags</h3>
+      <button class="btn alt wide" id="openMags">Open archive</button>
+
+      <h3 class="section-h">Categories</h3>
+      <div class="chips" id="setCat"></div>
+      <button class="btn alt" data-add="categories">+ Category</button>
+
+      <h3 class="section-h">Tags</h3>
+      <div class="chips" id="setTag"></div>
+      <button class="btn alt" data-add="tags">+ Tag</button>
+    </div>
+
+    <div id="me-mags" hidden>
+      <button class="back" id="backMe">‹ Archetype</button>
+      <h1 class="title">Mini-mags</h1>
+      <p class="sub">One issue a month, built from your dumps.</p>
+      <div id="mags"></div>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button data-go="home" class="on">Dump</button>
+  <button data-go="wall">Scrapbook</button>
+  <button data-go="me">Me</button>
+</nav>
+
+<div id="modal"><div class="card" id="card" role="dialog" aria-modal="true"></div></div>
+<div id="toast"></div>
+
+<script>
+/* ---------- constants ---------- */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WORD = {political:'Political', funny:'Chaotic', cute:'Soft', lovely:'Romantic', girly:'Girl', art:'Artsy'};
+const MOOD = {political:'Fired up', funny:'Giggly', cute:'Soft', lovely:'Dreamy', girly:'Glam', art:'Inspired'};
+const INTRO = {political:'Politics kept coming up', funny:'Humor was everywhere', cute:'Cute things piled up', lovely:'A lovely, soft thread ran through the month', girly:'The girly side showed up', art:'Art kept catching your eye'};
+const VERBS = {book:'📖', art:'🎨', game:'🎮', magazine:'✂️'};
+const NOUNS = {book:'a book', art:'an artwork', game:'a game', magazine:'a magazine clipping'};
+
+/* ---------- state ---------- */
+let CATS = {};              // name -> color, loaded from Neon
+let tags = [];              // tag names, loaded from Neon
+let dumps = [];             // loaded from Neon
+let selCat = null;
+let selTags = new Set();
+let fCat = 'all', fTag = null, newest = true;
+let PIN = localStorage.getItem('dump-pin') || '';
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const verb = c => VERBS[c] || '✨';
+const noun = c => NOUNS[c] || `a ${c}`;
+const colorOf = c => CATS[c] || '#f4c2d7';
+const fmt = d => { const [y,m,j] = d.split('-'); return `${+j} ${MONTHS[+m-1].slice(0,3)}`; };
+const topN = (obj, n) => Object.entries(obj).sort((a,b) => b[1]-a[1]).slice(0,n);
+const chip = (label, on, attrs, cls='') => `<button class="chip ${cls} ${on?'on':''}" ${attrs}>${esc(label)}</button>`;
+
+function toast(msg){
+  const e = $('#toast'); e.textContent = msg; e.classList.add('on');
+  clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 1600);
+}
+function openModal(html){ $('#card').innerHTML = html; $('#modal').classList.add('on'); }
+function closeModal(){ $('#modal').classList.remove('on'); }
+
+/* ---------- API ---------- */
+async function api(path, opts = {}){
+  if (!PIN){
+    PIN = prompt('Access code?') || '';
+    localStorage.setItem('dump-pin', PIN);
+  }
+  const r = await fetch('/api' + path, {
+    ...opts,
+    headers: {'content-type':'application/json', 'x-pin': PIN}
+  });
+  if (r.status === 401){
+    PIN = ''; localStorage.removeItem('dump-pin');
+    throw new Error('pin');
+  }
+  if (!r.ok) throw new Error(String(r.status));
+  return r.json();
+}
+
+async function load(){
+  const j = await api('/dumps');
+  dumps = j.dumps;
+  CATS = Object.fromEntries(j.categories.map(c => [c.name, c.color]));
+  tags = j.tags;
+  if (!selCat || !CATS[selCat]) selCat = Object.keys(CATS)[0] || null;
+}
+
+/* ---------- archetype & issues ---------- */
+function archetype(list){
+  const tc = {}, cc = {};
+  list.forEach(d => {
+    cc[d.cat] = (cc[d.cat] || 0) + 1;
+    d.tags.forEach(t => tc[t] = (tc[t] || 0) + 1);
+  });
+  const [t1, t2] = topN(tc, 2).map(x => x[0]);
+  const words = [t1 && (WORD[t1] || cap(t1)), t2 && (WORD[t2] || cap(t2))].filter(Boolean);
+  words.sort((a,b) => (a === 'Girl') - (b === 'Girl'));
+  const c = (topN(cc, 1)[0] || [])[0];
+  return { name: words.join(' ') || 'Blank', verb: c ? verb(c) : '✨', tc, cc };
+}
+
+function issueInfo(list){
+  const a = archetype(list);
+  const mood = topN(a.tc, 2).map(x => MOOD[x[0]] || cap(x[0])).join(' & ') || 'Quiet month';
+  const [cat, n] = topN(a.cc, 1)[0] || ['', 0];
+  return { a, mood, cat, n };
+}
+
+function issues(){
+  const g = {};
+  dumps.forEach(d => (g[d.date.slice(0,7)] ||= []).push(d));
+  return Object.entries(g).sort((a,b) => b[0].localeCompare(a[0]));
+}
+
+function templatePara(tag, ds){
+  const intro = INTRO[tag] || `${cap(tag)} kept coming back`;
+  const bits = ds.map(d => `${noun(d.cat)} on “${d.text.replace(/[.!?]+$/,'')}”`);
+  if (bits.length === 1) return `${intro}, through ${bits[0]}.`;
+  return `${intro}: ${bits.slice(0,-1).join(', ')} and ${bits[bits.length-1]}, all circling the same idea.`;
+}
+
+function templateSections(list, s){
+  const g = {};
+  list.forEach(d => {
+    const t = [...d.tags].sort((x,y) => (s.a.tc[y]||0) - (s.a.tc[x]||0))[0] || 'loose ends';
+    (g[t] ||= []).push(d);
+  });
+  return Object.entries(g)
+    .sort((a,b) => b[1].length - a[1].length)
+    .map(([t, ds]) => `<h4>${esc(cap(t))}</h4><p>${esc(templatePara(t, ds))}</p>`)
+    .join('');
+}
+
+/* Optional: rewrite the issue with Claude. Only works inside claude.ai artifacts. */
+async function rewriteIssue(list, s){
+  const box = $('#secs');
+  const claude = window.claude;
+  if (!box || !claude) return;
+  const note = document.createElement('p');
+  note.className = 'sub';
+  note.textContent = 'Claude is rewriting this issue…';
+  box.before(note);
+  try {
+    const sample = await claude.use('sample');
+    if (!sample) return;
+    const items = list.map(d => `- [${d.cat}] ${d.text} (tags: ${d.tags.join(', ')})`).join('\n');
+    const r = await sample(
+      `You write one issue of a tiny personal magazine. Mood: ${s.mood}.\n` +
+      `Saved items:\n${items}\n\n` +
+      `Rewrite them as 1 to 3 short blocks of flowing prose (max 60 words each, light and warm). ` +
+      `Merge items that share a subject even if their category or tags differ, and confront them when they relate ` +
+      `(for example two famous artworks by the same artist). Never write a list. ` +
+      `Format: each block starts with a line "## Block title", then the paragraph. Nothing else.`
+    );
+    const html = r.text.split(/^## /m).map(x => x.trim()).filter(Boolean).map(b => {
+      const [h, ...rest] = b.split('\n');
+      return `<h4>${esc(h.trim())}</h4><p>${esc(rest.join(' ').trim())}</p>`;
+    }).join('');
+    if (html && $('#secs') === box) box.innerHTML = html;
+  } catch (e) {
+    /* fall back silently to the template */
+  } finally {
+    note.remove();
+  }
+}
+
+function openIssue(key){
+  const entry = issues().find(i => i[0] === key);
+  if (!entry) return;
+  const list = entry[1];
+  const [y, m] = key.split('-');
+  const s = issueInfo(list);
+  openModal(`
+    <div class="iss">
+      <p class="sub" style="margin:0 0 4px">${MONTHS[+m-1]} ${y}</p>
+      <h3 class="iss-title">${esc(s.mood)}</h3>
+      <p class="sub" style="margin:6px 0 4px">Main topic: ${esc(s.cat)} ${verb(s.cat)} · ${s.n} of ${list.length} dumps</p>
+      <div id="secs">${templateSections(list, s)}</div>
+    </div>
+    <button class="btn wide" data-act="close" style="margin-top:22px">Close</button>`);
+  rewriteIssue(list, s);
+}
+
+/* ---------- rendering ---------- */
+function renderHome(){
+  $('#catPick').innerHTML = Object.entries(CATS).map(([c, col]) =>
+    `<button class="chip ${selCat===c?'on':''}" style="--c:${col}" data-cat="${esc(c)}">${esc(c)}</button>`
+  ).join('');
+  $('#tagPick').innerHTML = tags.map(t => chip(t, selTags.has(t), `data-tag="${esc(t)}"`, 'tag')).join('');
+}
+
+function dumpCard(d, tag = 'button'){
+  return `<${tag} class="dump" style="--c:${colorOf(d.cat)}" data-open="${d.id}">` +
+    `<p>${esc(d.text)}</p>` +
+    `<small>${esc(d.cat)} · ${esc(d.tags.join(', '))} · ${fmt(d.date)}</small>` +
+    `</${tag}>`;
+}
+
+function renderWall(){
+  $('#fCat').innerHTML = ['all', ...Object.keys(CATS)].map(c => chip(c, fCat===c, `data-fcat="${esc(c)}"`)).join('');
+  $('#fTag').innerHTML = tags.map(t => chip(t, fTag===t, `data-ftag="${esc(t)}"`, 'tag')).join('');
+  $('#sort').textContent = newest ? 'Newest first' : 'Oldest first';
+
+  let list = dumps.filter(d => (fCat === 'all' || d.cat === fCat) && (!fTag || d.tags.includes(fTag)));
+  list = [...list].sort((a,b) => newest ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date));
+  $('#wallCount').textContent = `${list.length} of ${dumps.length} dumps`;
+  $('#wall').innerHTML = list.length
+    ? list.map(d => dumpCard(d)).join('')
+    : '<p class="empty">Nothing matches. Try another filter.</p>';
+}
+
+function renderMe(){
+  const a = archetype(dumps);
+  $('#arch').innerHTML = `<h2>${esc(a.name)} <em>${a.verb}</em></h2>` +
+    `<p class="sub" style="margin:10px 0 0">Built from your most-used tags.</p>`;
+
+  const top = topN(a.tc, 5);
+  const max = top.length ? top[0][1] : 1;
+  $('#bars').innerHTML = top.map(([t, n]) =>
+    `<div class="bar"><span>${esc(t)}</span><i style="width:${n/max*60}%"></i><span>${n}</span></div>`
+  ).join('');
+
+  $('#setCat').innerHTML = Object.entries(CATS).map(([c, col]) =>
+    `<button class="chip on" style="--c:${col}" data-kind="categories" data-edit="${esc(c)}">${esc(c)}</button>`
+  ).join('');
+  $('#setTag').innerHTML = tags.map(t =>
+    `<button class="chip tag" data-kind="tags" data-edit="${esc(t)}">${esc(t)}</button>`
+  ).join('');
+}
+
+function renderMags(){
+  const all = issues();
+  $('#mags').innerHTML = all.length
+    ? all.map(([k, list], i) => {
+        const [y, m] = k.split('-');
+        const s = issueInfo(list);
+        const c = colorOf(s.cat);
+        return `<button class="mag" data-issue="${k}">
+          <span class="cover" style="--c:${c}">${MONTHS[+m-1].slice(0,3)}</span>
+          <span><strong>${esc(s.mood)}</strong><br>
+          <span class="sub" style="margin:0">${MONTHS[+m-1]} ${y} · ${esc(s.cat)} ${verb(s.cat)} · ${list.length} dumps${i===0?' · in progress':''}</span></span>
+        </button>`;
+      }).join('')
+    : '<p class="empty">No issues yet. Save a few dumps first.</p>';
+}
+
+function renderAll(){ renderHome(); renderWall(); renderMe(); }
+
+function go(p){
+  document.querySelectorAll('.page').forEach(e => e.classList.toggle('on', e.id === 'p-' + p));
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.go === p));
+  if (p === 'wall') renderWall();
+  if (p === 'me'){
+    renderMe();
+    $('#me-main').hidden = false;
+    $('#me-mags').hidden = true;
+  }
+  window.scrollTo(0, 0);
+}
+
+/* ---------- actions ---------- */
+async function saveDump(){
+  const text = $('#txt').value.trim();
+  if (!text) return toast('Write something first');
+  if (!selCat) return toast('Add a category first');
+  try {
+    const row = await api('/dumps', {
+      method: 'POST',
+      body: JSON.stringify({ text, cat: selCat, tags: [...selTags] })
+    });
+    dumps.unshift(row);
+    $('#txt').value = '';
+    selTags.clear();
+    renderAll();
+    toast('Dumped ✓');
+  } catch (e) {
+    toast('Could not save. Check your connection.');
+  }
+}
+
+async function addTag(){
+  const v = $('#newTag').value.trim().toLowerCase();
+  if (!v) return;
+  $('#newTag').value = '';
+  if (!tags.includes(v)){
+    tags.push(v);
+    try {
+      await api('/dumps?kind=tags', { method: 'POST', body: JSON.stringify({ name: v }) });
+    } catch (e) { toast('Could not save tag'); }
+  }
+  selTags.add(v);
+  renderAll();
+}
+
+async function editItem(kind, name){
+  const nv = prompt(`Rename “${name}”? (leave empty to delete)`, name);
+  if (nv === null) return;
+  const v = nv.trim().toLowerCase();
+  const q = `/dumps?kind=${kind}`;
+  try {
+    if (!v){
+      const qs = kind === 'categories'
+        ? `${q}&name=${encodeURIComponent(name)}`
+        : `${q}&name=${encodeURIComponent(name)}`;
+      await api(qs, { method: 'DELETE' });
+    } else if (v !== name){
+      const body = kind === 'categories'
+        ? { old: name, name: v, color: CATS[name] }
+        : { old: name, name: v };
+      await api(q, { method: 'PATCH', body: JSON.stringify(body) });
+    }
+    await load();
+    renderAll();
+    toast('Saved ✓');
+  } catch (err) {
+    toast(err.message === '409'
+      ? 'Still used by some dumps. Move them first.'
+      : 'Could not update');
+  }
+}
+
+async function addItem(kind){
+  const v = prompt(kind === 'categories' ? 'Category name?' : 'Tag name?');
+  if (!v || !v.trim()) return;
+  const name = v.trim().toLowerCase();
+  const body = kind === 'categories'
+    ? { name, color: prompt('Color (hex)?', '#f4c2d7') || '#f4c2d7' }
+    : { name };
+  try {
+    await api(`/dumps?kind=${kind}`, { method: 'POST', body: JSON.stringify(body) });
+    await load();
+    renderAll();
+  } catch (err) {
+    toast('Could not add (already exists?)');
+  }
+}
+
+async function deleteDump(id){
+  try {
+    await api('/dumps?id=' + id, { method: 'DELETE' });
+    dumps = dumps.filter(x => x.id !== id);
+    closeModal();
+    renderAll();
+  } catch (e) {
+    toast('Could not delete');
+  }
+}
+
+function openDump(id){
+  const x = dumps.find(y => y.id === id);
+  if (!x) return;
+  openModal(`${dumpCard(x, 'div')}
+    <div class="row">
+      <button class="btn alt" data-act="del" data-id="${x.id}" style="flex:1">Delete</button>
+      <button class="btn" data-act="close" style="flex:1">Close</button>
+    </div>`);
+}
+
+function shuffle(){
+  if (!dumps.length) return;
+  const d = dumps[Math.floor(Math.random() * dumps.length)];
+  openModal(`<h3 class="modal-title">From your pile</h3>${dumpCard(d, 'div')}
+    <div class="row">
+      <button class="btn alt" data-act="shuffle" style="flex:1">Shuffle again</button>
+      <button class="btn" data-act="close" style="flex:1">Close</button>
+    </div>`);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  if (e.target.id === 'modal') return closeModal();
+  const t = e.target.closest('button');
+  if (!t) return;
+  const d = t.dataset;
+
+  if (d.go) return go(d.go);
+  if (d.cat){ selCat = d.cat; return renderHome(); }
+  if (d.tag){ selTags.has(d.tag) ? selTags.delete(d.tag) : selTags.add(d.tag); return renderHome(); }
+  if (d.fcat){ fCat = d.fcat; return renderWall(); }
+  if (d.ftag){ fTag = fTag === d.ftag ? null : d.ftag; return renderWall(); }
+  if (d.open) return openDump(+d.open);
+  if (d.issue) return openIssue(d.issue);
+  if (d.edit) return editItem(d.kind, d.edit);
+  if (d.add) return addItem(d.add);
+  if (d.act === 'close') return closeModal();
+  if (d.act === 'shuffle') return shuffle();
+  if (d.act === 'del') return deleteDump(+d.id);
+
+  switch (t.id){
+    case 'shuf': return shuffle();
+    case 'save': return saveDump();
+    case 'addTag': return addTag();
+    case 'sort': newest = !newest; return renderWall();
+    case 'openMags':
+      renderMags();
+      $('#me-main').hidden = true;
+      $('#me-mags').hidden = false;
+      return window.scrollTo(0, 0);
+    case 'backMe':
+      $('#me-main').hidden = false;
+      $('#me-mags').hidden = true;
+      return window.scrollTo(0, 0);
+  }
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ---------- start ---------- */
+async function init(){
+  renderHome();
+  try {
+    await load();
+    renderAll();
+    setTimeout(shuffle, 350);
+  } catch (e) {
+    toast(e.message === 'pin' ? 'Wrong access code. Reload to try again.' : 'Connection failed');
+  }
+}
+init();
+</script>
+</body>
+</html>
