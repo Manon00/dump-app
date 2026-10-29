@@ -468,7 +468,7 @@ async function addItem(kind){
 async function deleteDump(id){
   try {
     await api('/dumps?id=' + id, { method: 'DELETE' });
-    dumps = dumps.filter(x => x.id !== id);
+    dumps = dumps.filter(x => String(x.id) !== String(id));
     closeModal();
     renderAll();
   } catch (e) {
@@ -477,7 +477,7 @@ async function deleteDump(id){
 }
 
 function openDump(id){
-  const x = dumps.find(y => y.id === id);
+    const x = dumps.find(y => String(y.id) === String(id));
   if (!x) return;
   openModal(`${dumpCard(x, 'div')}
     <div class="row">
@@ -508,13 +508,13 @@ document.addEventListener('click', e => {
   if (d.tag){ selTags.has(d.tag) ? selTags.delete(d.tag) : selTags.add(d.tag); return renderHome(); }
   if (d.fcat){ fCat = d.fcat; return renderWall(); }
   if (d.ftag){ fTag = fTag === d.ftag ? null : d.ftag; return renderWall(); }
-  if (d.open) return openDump(+d.open);
+  if (d.open) return openDump(d.open);
   if (d.issue) return openIssue(d.issue);
   if (d.edit) return editItem(d.kind, d.edit);
   if (d.add) return addItem(d.add);
   if (d.act === 'close') return closeModal();
   if (d.act === 'shuffle') return shuffle();
-  if (d.act === 'del') return deleteDump(+d.id);
+  if (d.act === 'del') return deleteDump(d.id);
 
   switch (t.id){
     case 'shuf': return shuffle();
