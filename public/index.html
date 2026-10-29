@@ -71,9 +71,24 @@ main{max-width:760px;margin:0 auto;padding:22px 18px 110px}
 .iss h4{font-size:19px;margin:20px 0 6px;color:var(--pink)}
 .iss p{font-size:16px;line-height:1.65;margin:0}
 
-nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:6px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(23,18,15,.92);backdrop-filter:blur(10px)}
+nav{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  width:min(92vw,420px);
+  display:flex;
+  gap:6px;
+  padding:6px;
+  z-index:100;
+  background:linear-gradient(180deg,#2f241e,#241b17);
+  border:1px solid rgba(243,231,223,.08);
+  border-radius:99px;
+  box-shadow:0 14px 34px rgba(0,0,0,.55),0 2px 0 rgba(255,255,255,.04) inset;
+  backdrop-filter:blur(12px);
+}
 nav button{flex:1;max-width:200px;padding:11px 8px;border-radius:99px;color:var(--mut);font-weight:700}
-nav button.on{background:var(--s2);color:var(--org)}
+nav button.on{background:var(--org);color:#2a1a14;box-shadow:0 4px 12px rgba(246,185,138,.35)}
 
 #modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,7,5,.7);z-index:5}
 #modal.on{display:flex}
